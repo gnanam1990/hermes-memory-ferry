@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Memory Ferry is a local Hermes memory provider with provenance-aware migration, retrieval-parity evidence, and isolated rollback."
+    />
+    <meta name="theme-color" content="#070b0c" />
+    <meta property="og:title" content="Memory Ferry — Migrate memory with evidence" />
+    <meta
+      property="og:description"
+      content="A real Hermes plugin that moves built-in memory into a local provider without losing provenance, approval integrity, or rollback boundaries."
+    />
+    <meta property="og:type" content="website" />
+    <title>Memory Ferry — Hermes memory migration with evidence</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <nav class="nav shell" aria-label="Primary navigation">
+        <a class="brand" href="#top" aria-label="Memory Ferry home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img">
+              <path d="M4 15.5h16M7.5 11.5h9l2 4H5.5l2-4ZM9 11.5V8.8c0-1.8 1.3-3.3 3-3.3s3 1.5 3 3.3v2.7M8 18.5h.01M16 18.5h.01" />
+            </svg>
+          </span>
+          <span>Memory Ferry</span>
+        </a>
+        <div class="nav-links">
+          <a href="#evidence">Evidence</a>
+          <a href="#boundary">Scope</a>
+          <a
+            class="nav-cta"
+            href="https://github.com/gnanam1990/hermes-memory-ferry"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Source code
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero shell" id="top" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="eyebrow">
+            <span class="status-dot" aria-hidden="true"></span>
+            Real Hermes plugin · local by design
+          </div>
+          <h1 id="hero-title">Move memory.<br /><span>Keep the proof.</span></h1>
+          <p class="hero-lede">
+            Memory Ferry migrates Hermes built-in memory into a local provider with a
+            digest-bound dry run, durable idempotency, retrieval-parity evidence, and rollback
+            that can touch only its own records.
+          </p>
+          <div class="hero-actions">
+            <a
+              class="button button-primary"
+              href="https://github.com/gnanam1990/hermes-memory-ferry"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Explore the implementation
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+            </a>
+            <a
+              class="button button-secondary"
+              href="https://github.com/NousResearch/hermes-agent/pull/153617"
+              target="_blank"
+              rel="noreferrer"
+            >
+              View catalog PR
+            </a>
+          </div>
+          <p class="release-note">
+            Release evidence captured 11 Nov 2026 against Hermes 0.23.1.
+          </p>
+        </div>
+
+        <div class="proof-console" aria-label="Verified migration result summary">
+          <div class="console-bar">
+            <div class="console-lights" aria-hidden="true">
+              <span></span><span></span><span></span>
+            </div>
+            <span class="console-title">migration / authoritative journal</span>
+            <span class="console-state">SUCCEEDED</span>
+          </div>
+          <div class="console-body">
+            <div class="command"><span>$</span> hermes memory-ferry verify mf_01</div>
+            <div class="event-line">
+              <span class="line-index">01</span>
+              <span>source snapshot</span>
+              <span class="event-value">HASH BOUND</span>
+            </div>
+            <div class="event-line">
+              <span class="line-index">02</span>
+              <span>plan decisions</span>
+              <span class="event-value">3 CREATE · 1 BLOCKED</span>
+            </div>
+            <div class="event-line">
+              <span class="line-index">03</span>
+              <span>destination mutations</span>
+              <span class="event-value">3 IMPORTED</span>
+            </div>
+            <div class="event-line">
+              <span class="line-index">04</span>
+              <span>retrieval overlap</span>
+              <span class="event-value">1.0</span>
+            </div>
+            <div class="event-line event-line-final">
+              <span class="line-index">05</span>
+              <span>parity verdict</span>
+              <span class="event-value verdict">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+                PASS
+              </span>
+            </div>
+            <div class="console-foot">
+              <span>rollback → 3 removed · 0 conflicts</span>
+              <span>source hashes → unchanged</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="signal-strip" aria-label="Verified project facts">
+        <div class="shell signal-grid">
+          <div><strong>13 / 13</strong><span>tests passing</span></div>
+          <div><strong>0</strong><span>network calls</span></div>
+          <div><strong>0600</strong><span>evidence artifacts</span></div>
+          <div><strong>PASS</strong><span>official validation</span></div>
+        </div>
+      </section>
+
+      <section class="section shell" aria-labelledby="problem-title">
+        <div class="section-heading">
+          <p class="section-kicker">The problem</p>
+          <h2 id="problem-title">Copying memory is easy.<br />Proving what happened is not.</h2>
+          <p>
+            A manual migration loses source locations, silently duplicates records, and gives an
+            operator no defensible answer when retrieval changes or rollback removes the wrong
+            thing.
+          </p>
+        </div>
+
+        <div class="risk-grid">
+          <article class="risk-card">
+            <div class="icon-box" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M6 6l12 12M18 6 6 18" /></svg>
+            </div>
+            <h3>Provenance collapses</h3>
+            <p>Source file, section, line span, mtime, and content hash disappear in copy/paste.</p>
+          </article>
+          <article class="risk-card">
+            <div class="icon-box" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10M18 16v5M15.5 18.5h5" /></svg>
+            </div>
+            <h3>Retries create drift</h3>
+            <p>A timeout makes it unclear whether to retry, reconcile, or risk a second write.</p>
+          </article>
+          <article class="risk-card">
+            <div class="icon-box" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM8 9h8M8 13h5" /></svg>
+            </div>
+            <h3>Success is assumed</h3>
+            <p>Row counts cannot prove that the destination still returns the memories users need.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-panel" aria-labelledby="loop-title">
+        <div class="shell">
+          <div class="section-heading section-heading-wide">
+            <p class="section-kicker">The control loop</p>
+            <h2 id="loop-title">One migration. Seven explicit gates.</h2>
+            <p>
+              Every step emits evidence from the same local journal. Nothing depends on a hosted
+              control plane, API key, or remote worker.
+            </p>
+          </div>
+
+          <ol class="workflow">
+            <li><span>01</span><div><strong>Preflight</strong><p>Verify readable sources and destination readiness.</p></div></li>
+            <li><span>02</span><div><strong>Plan</strong><p>Export canonical JSONL and classify every record.</p></div></li>
+            <li><span>03</span><div><strong>Approve</strong><p>Bind the exact source, policy, decisions, and destination.</p></div></li>
+            <li><span>04</span><div><strong>Run</strong><p>Journal intent before mutation and reconcile interrupted work.</p></div></li>
+            <li><span>05</span><div><strong>Verify</strong><p>Measure deterministic retrieval overlap, never just row counts.</p></div></li>
+            <li><span>06</span><div><strong>Report</strong><p>Generate a standalone, content-free evidence UI.</p></div></li>
+            <li><span>07</span><div><strong>Rollback</strong><p>Remove only records with exact migration ownership proof.</p></div></li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section shell" id="evidence" aria-labelledby="evidence-title">
+        <div class="section-heading section-heading-wide">
+          <p class="section-kicker">Release evidence</p>
+          <h2 id="evidence-title">Claims connected to checks.</h2>
+          <p>
+            This page is a presentation layer for reproducible repository evidence. It does not
+            simulate the plugin or manufacture runtime state.
+          </p>
+        </div>
+
+        <div class="evidence-frame">
+          <div class="evidence-head">
+            <span>Check</span><span>Observed result</span><span>Status</span>
+          </div>
+          <div class="evidence-row">
+            <span>Standalone unit suite</span><span>13 tests, real files and SQLite transactions</span><strong>PASS</strong>
+          </div>
+          <div class="evidence-row">
+            <span>Hermes contract suite</span><span>13 tests against current upstream API</span><strong>PASS</strong>
+          </div>
+          <div class="evidence-row">
+            <span>Official plugin validator</span><span>manifest, loading, registration, isolation, security</span><strong>PASS</strong>
+          </div>
+          <div class="evidence-row">
+            <span>Clean-profile migration</span><span>3 imported, 1 policy-blocked, parity overlap 1.0</span><strong>PASS</strong>
+          </div>
+          <div class="evidence-row">
+            <span>Isolated rollback</span><span>3 removed, 0 conflicts, source hashes unchanged</span><strong>PASS</strong>
+          </div>
+        </div>
+        <a
+          class="text-link"
+          href="https://github.com/gnanam1990/hermes-memory-ferry/blob/main/BUILD-EVIDENCE.md"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Read the reproducible build evidence
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+        </a>
+      </section>
+
+      <section class="section shell boundary" id="boundary" aria-labelledby="boundary-title">
+        <div class="boundary-main">
+          <p class="section-kicker">Honest boundary</p>
+          <h2 id="boundary-title">Narrow enough to be real.</h2>
+          <p>
+            Version 0.1.0 supports one production-shaped route: Hermes built-in
+            <code>MEMORY.md</code> and <code>USER.md</code> into Memory Ferry's local SQLite
+            provider. Arbitrary third-party provider migration is not implemented or claimed.
+          </p>
+          <div class="route" aria-label="Supported migration route">
+            <div><span>READ ONLY</span><strong>MEMORY.md<br />USER.md</strong></div>
+            <svg viewBox="0 0 40 24" aria-hidden="true"><path d="M2 12h32m-7-7 7 7-7 7" /></svg>
+            <div><span>LOCAL</span><strong>Memory Ferry<br />SQLite provider</strong></div>
+          </div>
+        </div>
+        <aside class="boundary-aside" aria-label="Security properties">
+          <h3>Security properties</h3>
+          <ul>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>No credentials or telemetry</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>No network calls or subprocesses</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>Secret-like records blocked by default</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>Exact-plan integrity checked before writes</li>
+            <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>Rollback requires ownership proof</li>
+          </ul>
+          <a
+            href="https://github.com/gnanam1990/hermes-memory-ferry/blob/main/DISCLOSURES.md"
+            target="_blank"
+            rel="noreferrer"
+          >Full risk disclosures</a>
+        </aside>
+      </section>
+
+      <section class="closing">
+        <div class="shell closing-inner">
+          <div>
+            <p class="section-kicker">Memory should be portable</p>
+            <h2>Trust the move because you can inspect the proof.</h2>
+          </div>
+          <a
+            class="button button-primary"
+            href="https://github.com/gnanam1990/hermes-memory-ferry"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open the repository
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell footer-inner">
+        <p><strong>Memory Ferry</strong> · Open-source Hermes memory provider</p>
+        <p>Evidence, not a simulated demo.</p>
+      </div>
+    </footer>
+  </body>
+</html>

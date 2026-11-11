@@ -1,0 +1,5 @@
+name: memory-ferry
+version: 0.1.0
+description: "Migrate built-in Hermes MEMORY.md and USER.md into a local, provenance-preserving memory provider with dry-run diff, parity evidence, and isolated rollback."
+requires_hermes: ">=0.23.1"
+

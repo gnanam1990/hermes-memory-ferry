@@ -1,6 +1,6 @@
 # Memory Ferry
 
-Memory Ferry is a local Hermes memory provider that safely migrates the active profile's built-in `MEMORY.md` and `USER.md` records into a provenance-preserving SQLite store. It creates a canonical JSONL export, shows an immutable dry-run plan, requires an exact digest approval, imports with unique migration markers, evaluates deterministic retrieval parity, and rolls back only records proven to belong to that migration.
+Memory Ferry is a local Hermes memory provider that safely migrates the active profile's built-in `MEMORY.md` and `USER.md` records into a provenance-preserving SQLite store. It creates a canonical JSONL export, shows an integrity-checked dry-run plan, requires an exact digest approval, imports with unique migration markers, evaluates deterministic retrieval parity, and rolls back only records proven to belong to that migration.
 
 ## Honest scope
 

@@ -9,7 +9,7 @@ PYTHONWARNINGS=error python3 -m unittest discover -s tests -v
 # 13 tests, OK
 
 PYTHONWARNINGS=error \
-PYTHONPATH=/Users/kratos/Documents/Codex/2026-11-11/hermes-agent-catalog-submission \
+PYTHONPATH="$HERMES_UPSTREAM" \
 python3 -m unittest discover -s tests -v
 # 13 tests, OK against the real MemoryProvider contract
 
@@ -17,14 +17,14 @@ python3 -m compileall -q .
 python3 -m py_compile __init__.py cli.py memory_ferry/*.py tests/*.py
 # exit 0
 
-uv run --project /Users/kratos/Documents/Codex/2026-11-11/hermes-agent-catalog-submission \
-  python /Users/kratos/Documents/Codex/2026-11-11/hermes-agent-catalog-submission/hermes \
-  plugins validate "$PWD" --install-deps
+uv run --project "$HERMES_UPSTREAM" \
+  python "$HERMES_UPSTREAM/hermes" \
+  plugins validate "$PLUGIN_DIR" --install-deps
 # Validation passed
 
-uv run --project /Users/kratos/Documents/Codex/2026-11-11/hermes-agent-catalog-submission \
-  python /Users/kratos/Documents/Codex/2026-11-11/hermes-agent-catalog-submission/hermes \
-  plugins doctor "$PWD" --ci
+uv run --project "$HERMES_UPSTREAM" \
+  python "$HERMES_UPSTREAM/hermes" \
+  plugins doctor "$PLUGIN_DIR" --ci
 # OK: runtime discovery, manifest parsing, import, and registration passed
 ```
 
@@ -47,7 +47,7 @@ rollback         -> ROLLED_BACK, 3 removed, 0 conflicts
 source hashes    -> unchanged before and after rollback
 ```
 
-The test profile was `/private/tmp/memory-ferry-e2e.qVhAQx`; it is disposable evidence, not product state.
+The test profile was created with `mktemp -d`; it was disposable evidence, not product state.
 
 ## Honest boundary
 

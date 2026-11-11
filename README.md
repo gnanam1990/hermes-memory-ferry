@@ -2,6 +2,8 @@
 
 Memory Ferry is a local Hermes memory provider that safely migrates the active profile's built-in `MEMORY.md` and `USER.md` records into a provenance-preserving SQLite store. It creates a canonical JSONL export, shows an integrity-checked dry-run plan, requires an exact digest approval, imports with unique migration markers, evaluates deterministic retrieval parity, and rolls back only records proven to belong to that migration.
 
+**Product showcase:** [hermes-memory-ferry.vercel.app](https://hermes-memory-ferry.vercel.app) — a static presentation of the reproducible repository evidence, not a simulated migration runtime.
+
 ## Honest scope
 
 Version 0.1.0 supports one real migration route:

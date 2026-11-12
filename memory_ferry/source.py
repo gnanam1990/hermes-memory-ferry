@@ -14,17 +14,22 @@ _SECRET_PATTERNS = (
     re.compile(r"\b(?:sk-[A-Za-z0-9_-]{16,}|0x[a-fA-F0-9]{64})\b"),
 )
 
+# Hermes's built-in MemoryStore serializes entries with this exact delimiter.
+# Splitting on the full value intentionally keeps a bare ``§`` as record content.
+_ENTRY_DELIMITER = "\n§\n"
+
 
 class BuiltinMemorySource:
     """Snapshot and parse the profile's built-in memory without modifying it."""
 
-    adapter_version = "builtin-markdown-v1"
+    adapter_version = "builtin-memory-v2"
 
     def __init__(self, hermes_home: Path):
         self.hermes_home = Path(hermes_home).resolve()
+        memory_dir = self.hermes_home / "memories"
         self.paths = {
-            "memory": self.hermes_home / "MEMORY.md",
-            "user": self.hermes_home / "USER.md",
+            "memory": memory_dir / "MEMORY.md",
+            "user": memory_dir / "USER.md",
         }
 
     def preflight(self) -> dict:
@@ -59,29 +64,42 @@ class BuiltinMemorySource:
         }
 
     def _iter_blocks(self, target: str, path: Path) -> Iterable[CanonicalRecord]:
-        if not path.exists():
+        if not path.is_file():
             return
         text = path.read_text(encoding="utf-8-sig", errors="strict")
         stat = path.stat()
-        lines = text.splitlines()
-        section = "Unsectioned"
-        block: list[str] = []
-        block_start = 1
+        source_path = path.relative_to(self.hermes_home).as_posix()
+        cursor = 0
 
-        def emit(end_line: int):
-            nonlocal block
-            content = "\n".join(block).strip()
-            block = []
+        for raw_entry in text.split(_ENTRY_DELIMITER):
+            entry_start = cursor
+            entry_end = entry_start + len(raw_entry)
+            cursor = entry_end + len(_ENTRY_DELIMITER)
+
+            content = raw_entry.strip()
             if not content:
-                return None
+                continue
+
+            # Match Hermes MemoryStore._parse_entries while retaining useful source spans.
+            content_start = entry_start + (len(raw_entry) - len(raw_entry.lstrip()))
+            content_end = entry_start + len(raw_entry.rstrip())
+            start_line = text.count("\n", 0, content_start) + 1
+            end_line = text.count("\n", 0, max(content_start, content_end - 1)) + 1
+
+            section = "Unsectioned"
+            for line in content.splitlines():
+                if line.startswith("#"):
+                    section = line.lstrip("#").strip() or "Untitled"
+                    break
+
             content_hash = digest(content)
-            source_identity = f"{target}:{path.name}:{block_start}:{end_line}:{content_hash}"
+            source_identity = f"{target}:{source_path}:{start_line}:{end_line}:{content_hash}"
             labels = (target, section.casefold().replace(" ", "-")[:80])
-            return CanonicalRecord(
+            yield CanonicalRecord(
                 source_identity=source_identity,
                 source_target=target,
-                source_path=path.name,
-                start_line=block_start,
+                source_path=source_path,
+                start_line=start_line,
                 end_line=end_line,
                 section=section,
                 content=content,
@@ -89,27 +107,6 @@ class BuiltinMemorySource:
                 source_mtime_ns=stat.st_mtime_ns,
                 labels=labels,
             )
-
-        for index, line in enumerate(lines, start=1):
-            if line.startswith("#"):
-                record = emit(index - 1)
-                if record:
-                    yield record
-                section = line.lstrip("#").strip() or "Untitled"
-                block_start = index + 1
-                continue
-            if not line.strip():
-                record = emit(index - 1)
-                if record:
-                    yield record
-                block_start = index + 1
-                continue
-            if not block:
-                block_start = index
-            block.append(line)
-        record = emit(len(lines))
-        if record:
-            yield record
 
     def records(self, include_targets: tuple[str, ...] = ("memory", "user")) -> list[CanonicalRecord]:
         result: list[CanonicalRecord] = []

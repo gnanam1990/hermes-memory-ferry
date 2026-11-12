@@ -13,12 +13,18 @@ class MigrationTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.home = Path(self.temp.name)
-        (self.home / "MEMORY.md").write_text(
-            "# Deployments\nUse blue-green releases for payments.\n\n# Reliability\nRetries must be idempotent.\n",
+        self.memory_dir = self.home / "memories"
+        self.memory_dir.mkdir()
+        (self.memory_dir / "MEMORY.md").write_text(
+            "# Deployments\nUse blue-green releases for payments.\n\nKeep a rollback window."
+            "\n§\n"
+            "# Reliability\nRetries must be idempotent.\n",
             encoding="utf-8",
         )
-        (self.home / "USER.md").write_text(
-            "# Preferences\nPrefer concise evidence-led reports.\n\n# Private\nAPI key should never be copied.\n",
+        (self.memory_dir / "USER.md").write_text(
+            "# Preferences\nPrefer concise evidence-led reports."
+            "\n§\n"
+            "# Private\nAPI key should never be copied.\n",
             encoding="utf-8",
         )
         self.service = MigrationService(self.home)
@@ -32,11 +38,55 @@ class MigrationTests(unittest.TestCase):
         return plan
 
     def test_preflight_is_real_and_scope_is_narrow(self):
+        # A legacy/root-level decoy must not be treated as active Hermes memory.
+        (self.home / "MEMORY.md").write_text("ROOT DECOY", encoding="utf-8")
         result = self.service.preflight()
         self.assertEqual("SUPPORTED", result["status"])
         self.assertEqual("builtin-memory-to-memory-ferry-local-provider", result["scope"])
         self.assertTrue(result["destination"]["immutable_marker_lookup"])
         self.assertFalse(result["source"]["delete"])
+        self.assertEqual(
+            [
+                str((self.memory_dir / "MEMORY.md").resolve()),
+                str((self.memory_dir / "USER.md").resolve()),
+            ],
+            [item["path"] for item in result["source"]["files"]],
+        )
+
+        records = self.service.source.records()
+        self.assertEqual(4, len(records))
+        deployment = next(record for record in records if "blue-green" in record.content)
+        self.assertEqual(
+            "# Deployments\nUse blue-green releases for payments.\n\nKeep a rollback window.",
+            deployment.content,
+        )
+        self.assertEqual("memories/MEMORY.md", deployment.source_path)
+        self.assertEqual((1, 4), (deployment.start_line, deployment.end_line))
+        self.assertEqual("Deployments", deployment.section)
+        self.assertNotIn("ROOT DECOY", "\n".join(record.content for record in records))
+        self.assertTrue(all("§" not in record.content for record in records))
+
+        # Mirror Hermes's exact parser edge cases without adding alternate split rules.
+        with tempfile.TemporaryDirectory() as directory:
+            edge_home = Path(directory)
+            edge_memory = edge_home / "memories"
+            edge_memory.mkdir()
+            (edge_memory / "MEMORY.md").write_text(
+                "First paragraph.\n\n§\n\nSecond paragraph with a bare § character.",
+                encoding="utf-8",
+            )
+            (edge_memory / "USER.md").write_text(
+                "One whole file.\n\nStill the same entry.", encoding="utf-8"
+            )
+            edge_records = MigrationService(edge_home).source.records()
+            self.assertEqual(
+                [
+                    "First paragraph.",
+                    "Second paragraph with a bare § character.",
+                    "One whole file.\n\nStill the same entry.",
+                ],
+                [record.content for record in edge_records],
+            )
 
     def test_plan_blocks_sensitive_record_and_exports_canonical_jsonl(self):
         plan = self.service.create_plan()
@@ -51,7 +101,7 @@ class MigrationTests(unittest.TestCase):
 
     def test_source_mutation_invalidates_approval(self):
         plan = self.service.create_plan()
-        with (self.home / "MEMORY.md").open("a", encoding="utf-8") as handle:
+        with (self.memory_dir / "MEMORY.md").open("a", encoding="utf-8") as handle:
             handle.write("\nA late change.\n")
         with self.assertRaisesRegex(MigrationError, "source snapshot changed"):
             self.service.approve(plan["migration_id"], plan["plan_digest"])
@@ -79,8 +129,8 @@ class MigrationTests(unittest.TestCase):
         self.assertEqual("ROLLED_BACK", rolled["state"])
         remaining = self.service.store.rows()
         self.assertEqual([manual["provider_record_id"]], [row["provider_record_id"] for row in remaining])
-        self.assertTrue((self.home / "MEMORY.md").exists())
-        self.assertIn("blue-green", (self.home / "MEMORY.md").read_text(encoding="utf-8"))
+        self.assertTrue((self.memory_dir / "MEMORY.md").exists())
+        self.assertIn("blue-green", (self.memory_dir / "MEMORY.md").read_text(encoding="utf-8"))
 
     def test_missing_destination_evidence_is_incomplete_not_success(self):
         plan = self._approved()
@@ -134,7 +184,10 @@ class MigrationTests(unittest.TestCase):
         self.assertEqual("PASS", verified["report"]["status"])
 
     def test_exact_manual_duplicate_is_validated_as_destination_evidence(self):
-        duplicate = self.service.store.remember("Use blue-green releases for payments.", ["manual"])
+        duplicate = self.service.store.remember(
+            "# Deployments\nUse blue-green releases for payments.\n\nKeep a rollback window.",
+            ["manual"],
+        )
         plan = self._approved()
         self.assertEqual(1, plan["counts"]["EXACT_DUPLICATE"])
         run = self.service.run(plan["migration_id"])
@@ -160,7 +213,10 @@ class MigrationTests(unittest.TestCase):
             with self.subTest(column=column):
                 with tempfile.TemporaryDirectory() as directory:
                     home = Path(directory)
-                    (home / "MEMORY.md").write_text("# Safe\nApproved content.\n", encoding="utf-8")
+                    (home / "memories").mkdir()
+                    (home / "memories" / "MEMORY.md").write_text(
+                        "# Safe\nApproved content.\n", encoding="utf-8"
+                    )
                     service = MigrationService(home)
                     plan = service.create_plan()
                     service.approve(plan["migration_id"], plan["plan_digest"])
